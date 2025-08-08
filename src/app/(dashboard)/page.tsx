@@ -19,6 +19,7 @@ import { DashboardRecentAppointment } from "@/components/Dashboard/dashboard-rec
 import ProtectedLayout from "../(protected)/layout";
 import { getRoleFromLabels } from "@/utils/role-from-label";
 import { formatMoneyShort } from "@/utils/money-short";
+import { analyzeData } from "@/api/openai";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -86,7 +87,7 @@ export default function DashboardPage() {
     },
     enabled: !!user,
   });
-  
+ 
   useEffect(() => {
     if (!user) return;
     
@@ -124,6 +125,16 @@ export default function DashboardPage() {
     payments: payments,
     inventory: inventory,
   };
+  const {data:AiAnalysis,isLoading: isLoadingAiAnalysis} = useQuery({
+    queryKey: ['ai-analysis',mappedData],
+    queryFn: () => analyzeData({
+      patients:mappedData.patients?.data || [],
+      appointments:mappedData.appointments?.data || [],
+      payments:mappedData.payments?.data || [],
+      inventory:mappedData.inventory?.data || [],
+    })
+  })
+  
 
   const compareTotalPatientsBetweenMonth = (data: any) => {
     const currentMonth = new Date().getMonth();
@@ -186,6 +197,8 @@ export default function DashboardPage() {
 
     const currentMonthRevenue = getTotalAmount(currentMonthData);
     const previousMonthRevenue = getTotalAmount(previousMonthData);
+    // Add this near the top of the file after imports
+    // Add this near the top of the file after imports
 
     let totalRevenue = 0;
     let percentage = 0;
@@ -243,7 +256,8 @@ export default function DashboardPage() {
     isLoadingPatients ||
     isLoadingAppointments ||
     isLoadingPayments ||
-    isLoadingInventory
+    isLoadingInventory ||
+    isLoadingAiAnalysis
   ) {
     return <LoadingScreen />;
   }
@@ -267,7 +281,7 @@ export default function DashboardPage() {
           <div className="flex flex-col p-6 border-sidebar-border rounded-lg border">
             <h1 className="font-bold mb-2 text-xl">Phân Tích AI</h1>
             <p className="text-sm text-gray-500 mb-4">Phân tích và dự đoán xu hướng dựa trên dữ liệu phòng khám</p>
-            <DashboardAiInsights />
+            <DashboardAiInsights data= {AiAnalysis} isLoading = {isLoadingAiAnalysis}/>
           </div>
         </div>
       </PageContainer>

@@ -5,32 +5,43 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrainCircuit, TrendingUp, AlertTriangle } from "lucide-react"
+interface DashboardAiInsightsProps {
+  data?: {
+    summary: {
+      PatientGrowth: string;
+      OptimiseSchedule: string;
+      LowStock: string;
+      ConflictingSchedule: string;
+    };
+  };
+  isLoading?: boolean;
+}
 
-export function DashboardAiInsights() {
+export function DashboardAiInsights({data,isLoading}:DashboardAiInsightsProps) {
   const [activeTab, setActiveTab] = useState("predictions")
 
   const insights = {
     predictions: [
       {
-        title: "Dự Đoán Lượng Bệnh Nhân",
-        description: "Dự kiến tăng 20% lượng bệnh nhân trong tháng tới dựa trên dữ liệu lịch sử và xu hướng mùa.",
+        title: "",
+        description: `${data?.summary.PatientGrowth}`,
         icon: TrendingUp,
       },
       {
         title: "Tối Ưu Hóa Lịch Trình",
-        description: "Nên tăng cường nhân viên vào thứ 2 và thứ 5 để đáp ứng nhu cầu cao điểm.",
+        description: `${data?.summary.OptimiseSchedule}`,
         icon: BrainCircuit,
       },
     ],
     alerts: [
       {
         title: "Vật Tư Sắp Hết",
-        description: "Composite A2 sẽ hết trong 7 ngày nữa dựa trên tốc độ sử dụng hiện tại.",
+        description: `${data?.summary.LowStock}`,
         icon: AlertTriangle,
       },
       {
         title: "Lịch Hẹn Xung Đột",
-        description: "Phát hiện 2 lịch hẹn có khả năng xung đột vào ngày 02/04/2025.",
+        description: `${data?.summary.ConflictingSchedule}`,
         icon: AlertTriangle,
       },
     ],

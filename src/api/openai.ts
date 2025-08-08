@@ -75,3 +75,24 @@ export async function POST(request:Request) {
         return NextResponse.json({ error: "Failed to analyze data" }, { status: 500 });
     }
 }
+export const analyzeData = async(data:{
+    patients:any [];
+    appointments:any[];
+    payments: any[];
+    inventory : any[];
+}) => {
+    const response = await fetch('/api/openai', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to analyze data');
+    }
+
+    const result: AnalysisResponse = await response.json();
+    return result;
+}
