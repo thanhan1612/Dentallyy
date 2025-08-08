@@ -1,0 +1,71 @@
+import type { Metadata } from "next"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { ArrowLeft, Mail } from "lucide-react"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+
+export const metadata: Metadata = {
+  title: "Quên mật khẩu - Hypertek Dental Management",
+  description: "Khôi phục mật khẩu quản trị hệ thống",
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <div className="flex h-screen w-full flex-col items-center justify-center">
+      <div className="mx-auto flex w-full max-w-md flex-col justify-center space-y-6">
+        <Card className="border-2 border-primary/10 shadow-lg">
+          <CardHeader className="space-y-1 text-center">
+            <div className="mx-auto mb-4 flex items-center justify-center">
+              <div className="rounded-full bg-primary/10 p-2">
+                <Mail className="h-10 w-10 text-primary" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-bold">Khôi phục mật khẩu</CardTitle>
+            <CardDescription>Nhập email quản trị của bạn để nhận hướng dẫn đặt lại mật khẩu</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email" className="font-medium">
+                Email quản trị
+              </Label>
+              <div className="relative">
+                <Input
+                  id="email"
+                  placeholder="admin@example.com"
+                  type="email"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  autoCorrect="off"
+                  className="pl-10"
+                />
+                <div className="absolute left-3 top-3 text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-4">
+            <Button type="submit" className="w-full">
+              Gửi hướng dẫn đặt lại
+            </Button>
+            <div className="text-center text-sm">
+              <Link
+                href="/login"
+                className="inline-flex items-center text-sm text-primary underline-offset-4 hover:underline"
+              >
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                Quay lại đăng nhập
+              </Link>
+            </div>
+          </CardFooter>
+        </Card>
+        <div className="text-center text-sm text-muted-foreground">
+          <p>Liên hệ bộ phận IT nếu bạn không nhận được email</p>
+          <p>© {new Date().getFullYear()} Hypertek Dental Management</p>
+        </div>
+      </div>
+    </div>
+  )
+}

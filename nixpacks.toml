@@ -1,0 +1,39 @@
+# nixpacks.toml
+[phases.setup]
+  nixPkgs = ["nodejs_20", "yarn"]
+  aptPkgs = ["libc6", "curl"]
+
+[phases.install]
+  cmds = ["yarn install --frozen-lockfile --network-timeout 600000"]
+  dependsOn = ["setup"]
+
+[phases.build]
+  cmds = [
+    "yarn next --version",
+    "ls -la node_modules/.bin/next || echo 'node_modules/.bin/next not found'",
+    "ls -la node_modules/next/dist/bin/next || echo 'node_modules/next/dist/bin/next not found'",
+    "yarn build",
+    "ls -la .next/standalone || echo '.next/standalone directory not found after build'",
+    "ls -la .next/standalone/server.js || echo '.next/standalone/server.js not found'",
+    "mkdir -p .next/standalone/node_modules",
+    "cp -r node_modules/* .next/standalone/node_modules/",
+    "chmod -R 755 .next/standalone" # Đảm bảo quyền truy cập
+  ]
+  dependsOn = ["install"]
+
+[start]
+  cmd = "node /app/.next/standalone/server.js" # Dùng đường dẫn tuyệt đối
+  workingDir = "/app"
+
+[variables]
+  NODE_ENV = "production"
+  NEXT_TELEMETRY_DISABLED = "1"
+  NIXPACKS_NODE_VERSION = "20"
+  PORT = "3000"
+  NIXPACKS_PATH = "/app/node_modules/.bin:$NIXPACKS_PATH"
+
+[cache]
+  directories = ["node_modules", ".next/cache"]
+
+[[nixpacks.included_files]]
+  paths = ["/.next/standalone", "/.next/static", "/public"]

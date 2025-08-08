@@ -1,0 +1,46 @@
+/* Base sidebar styles */
+.sidebar-wrapper {
+    position: fixed;
+    height: calc(100vh - 4rem); /* Subtract header height */
+    width: var(--sidebar-width, 16rem);
+    transition: width 0.3s ease, transform 0.3s ease;
+    z-index: 30;
+    overflow: hidden;
+  }
+  
+  .sidebar-collapsed {
+    width: var(--sidebar-collapsed-width, 4rem);
+  }
+  
+  /* Ensure the sidebar content takes full height */
+  .sidebar-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .sidebar-wrapper {
+      transform: translateX(-100%);
+    }
+  
+    .sidebar-open {
+      transform: translateX(0);
+    }
+  }
+  
+  /* Smooth transitions for all sidebar states */
+  .sidebar-transition {
+    transition: all 0.3s ease;
+  }
+  
+  /* Auto-collapsed sidebar styles */
+  .sidebar-auto-collapsed {
+    width: var(--sidebar-collapsed-width, 4rem);
+  }
+  
+  .sidebar-auto-collapsed .sidebar-item-text {
+    display: none;
+  }
+  
