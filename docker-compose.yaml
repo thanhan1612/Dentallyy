@@ -13,7 +13,7 @@ services:
       - /app/.next
     environment:
       - NODE_ENV=development
-    command: yarn dev
+    command: npm run dev
     networks:
       - app-network
 

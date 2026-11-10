@@ -151,10 +151,10 @@ export default function PatientsPage() {
  
    const getNewPatients = (data: any) => {
     const inTreatments = data?.data?.filter(
-      treatment => treatment?.status === "process"
+      (treatment: any) => treatment?.status === "process"
     );
     const newTreatments = data?.data?.filter(
-      treatment => treatment?.status === "schedule"
+      (treatment: any) => treatment?.status === "schedule"
     );
 
     return {
@@ -172,7 +172,7 @@ export default function PatientsPage() {
     const today = new Date();
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(today.getDate() - 30);
-    const recentlyComplete = data?.filter(treatment => {
+    const recentlyComplete = data?.filter((treatment: any) => {
       const completeDate = new Date(treatment?.$updatedAt);
       return completeDate >= thirtyDaysAgo && completeDate <=today;
     })
@@ -187,7 +187,7 @@ export default function PatientsPage() {
     const today = new Date();
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(today.getDate() - 30);
-    const recentlyComplete = data?.data?.filter(patient => {
+    const recentlyComplete = data?.data?.filter((patient: any) => {
       const completeDate = new Date(patient.createDate);
       return completeDate >= thirtyDaysAgo && completeDate <=today;
     });
@@ -196,7 +196,7 @@ export default function PatientsPage() {
      const sixtyDaysAgo = new Date();
     sixtyDaysAgo.setDate(today.getDate() - 60);
   
-    const previousMonthComplete = data?.data?.filter(patient => {
+    const previousMonthComplete = data?.data?.filter((patient: any) => {
     const completeDate = new Date(patient.createDate);
     return completeDate >= sixtyDaysAgo && completeDate < thirtyDaysAgo;
   });

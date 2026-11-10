@@ -140,7 +140,7 @@ export default function PaymentPage() {
       };
     };
   const getTotalTransactions = (data: any) => {
-    const paidPatients = data?.data?.filter(payment => payment?.status == "completed");
+    const paidPatients = data?.data?.filter((payment: any) => payment?.status == "completed");
     const currentMonth = new Date().getMonth();
     const previousMonth = new Date(
         new Date().setMonth(currentMonth - 1)
@@ -153,7 +153,7 @@ export default function PaymentPage() {
       );
 
       const getCompletedPayments = (data:any) => {
-        const completedPayments = data?.filter(payment => payment?.status == 'completed');
+        const completedPayments = data?.filter((payment: any) => payment?.status == 'completed');
         return completedPayments;
       }
       const currentMonthRevenue = getCompletedPayments(currentMonthData);
@@ -171,14 +171,14 @@ export default function PaymentPage() {
     };
     }
   const getProcessTransactions = (data:any) => {
-    const processTransactions = data?.data?.filter(payment =>
+    const processTransactions = data?.data?.filter((payment: any) =>
        payment?.status == "process");
     let totalProcessCost  = 0;
     for (let i= 0;i < processTransactions.length;i++) {
       totalProcessCost += processTransactions[i].cost || 0;
     };
     let inDebtAmount = 0;
-    const inDebtTransactions = data?.data?.filter(payment => payment?.status == "debt");
+    const inDebtTransactions = data?.data?.filter((payment: any) => payment?.status == "debt");
     // funcion to get total paid amount of each record
     const getTotalPaidAmount = (paymentRecord:any) => {
       if (!paymentRecord.paid || paymentRecord.paid.length === 0) {
@@ -187,7 +187,7 @@ export default function PaymentPage() {
       
       let totalPaid = 0;
       
-      paymentRecord.paid.forEach(paidString => {
+      paymentRecord.paid.forEach((paidString: any) => {
         try {
           const paidData = JSON.parse(paidString);
           totalPaid += paidData.paid_amount || 0;

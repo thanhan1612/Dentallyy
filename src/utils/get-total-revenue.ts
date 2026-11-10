@@ -1,5 +1,5 @@
 const getTotalRevenue = (data:any) =>{
-  const completedTreatments = data?.data?.filter(treatment => treatment?.status === 'completed');
+  const completedTreatments = data?.data?.filter((treatment: any) => treatment?.status === 'completed');
   const currentMonth = new Date().getMonth();
   const previousMonth = new Date(
       new Date().setMonth(currentMonth - 1)

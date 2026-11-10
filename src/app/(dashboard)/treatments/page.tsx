@@ -129,12 +129,12 @@ export default function TreatmentsPage() {
     };
   };
   const getProcessTreatments = (data : any) => {
-    const processTreatments = data?.data?.filter(treatment => 
+    const processTreatments = data?.data?.filter((treatment: any) => 
       treatment?.status === "process"
     );
     const this_month  = new Date().getMonth();
     const this_year = new Date().getFullYear();
-    const newTreatments = data?.data?.filter(treatment => {
+    const newTreatments = data?.data?.filter((treatment: any) => {
       const startDate = new Date(treatment?.start_date);
       return startDate.getMonth() == this_month  && startDate.getFullYear() == this_year;
     })
@@ -146,13 +146,13 @@ export default function TreatmentsPage() {
   };
   console.log(treatmentsData);
 const getCompletedTreatments = (data:any) => {
-    const completedTreatments = data?.data?.filter(treatment => 
+    const completedTreatments = data?.data?.filter((treatment: any) => 
       treatment?.status === 'completed'
     );
      const today = new Date();
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(today.getDate() - 30);
-    const recentlyComplete = completedTreatments?.filter(treatment => {
+    const recentlyComplete = completedTreatments?.filter((treatment: any) => {
       const completeDate = new Date(treatment.$updatedAt);
       return completeDate >= thirtyDaysAgo && completeDate <=today;
     });
@@ -161,7 +161,7 @@ const getCompletedTreatments = (data:any) => {
      const sixtyDaysAgo = new Date();
       sixtyDaysAgo.setDate(today.getDate() - 60);
     
-      const previousMonthComplete = completedTreatments?.filter(treatment => {
+      const previousMonthComplete = completedTreatments?.filter((treatment: any) => {
       const completeDate = new Date(treatment.$updatedAt);
       return completeDate >= sixtyDaysAgo && completeDate < thirtyDaysAgo;
     });
@@ -179,7 +179,7 @@ const getCompletedTreatments = (data:any) => {
     }
   };
 const getTotalRevenue = (data:any) =>{
-  const completedTreatments = data?.data?.filter(treatment => treatment?.status === 'completed');
+  const completedTreatments = data?.data?.filter((treatment: any) => treatment?.status === 'completed');
   const currentMonth = new Date().getMonth();
   const previousMonth = new Date(
       new Date().setMonth(currentMonth - 1)

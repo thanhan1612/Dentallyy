@@ -4,7 +4,7 @@ import { PageContainer } from "@/components/PageContainer/page-container";
 import { StatCard } from "@/components/StatCard/stat-card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { User } from "lucide-react";
 import { DashboardHeader } from "@/components/Dashboard/dashboard-header";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +20,10 @@ import ProtectedLayout from "../(protected)/layout";
 import { getRoleFromLabels } from "@/utils/role-from-label";
 import { formatMoneyShort } from "@/utils/money-short";
 import { analyzeData } from "@/api/openai";
+import { buildClinicStats, isLowStock } from "@/utils/build-clinic-stats";
+
+// Dashboard stats & AI analysis look at up to this many records per collection.
+const DASHBOARD_LIMIT = 500;
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -29,8 +33,6 @@ export default function DashboardPage() {
     ? getRoleFromLabels(user.labels)
     : user?.[0]?.role;
   const isBranchAdmin = userRole === "branch_admin";
-  console.log('User object:', user);
-  console.log('User role:', userRole);
 
   const { data: patients, isLoading: isLoadingPatients } = useQuery({
     queryKey: ["patients"],
@@ -39,9 +41,9 @@ export default function DashboardPage() {
         return await patientsService.getPatientDocuments({
           fieldId: "branch",
           value: user?.[0]?.branch?.$id,
-        });
+        }, DASHBOARD_LIMIT);
       }
-      return await patientsService.getPatientDocuments();
+      return await patientsService.getPatientDocuments(undefined, DASHBOARD_LIMIT);
     },
     enabled: !!user,
   });
@@ -53,9 +55,9 @@ export default function DashboardPage() {
         return await appointmentService.fetchAppointmentDocuments({
           fieldId: "branch",
           value: user?.[0]?.branch?.$id,
-        });
+        }, DASHBOARD_LIMIT);
       }
-      return await appointmentService.fetchAppointmentDocuments();
+      return await appointmentService.fetchAppointmentDocuments(undefined, DASHBOARD_LIMIT);
     },
     enabled: !!user,
   });
@@ -67,9 +69,9 @@ export default function DashboardPage() {
         return await paymentService.getPaymentDocuments({
           fieldId: "branch",
           value: user?.[0]?.branch?.$id,
-        });
+        }, DASHBOARD_LIMIT);
       }
-      return await paymentService.getPaymentDocuments();
+      return await paymentService.getPaymentDocuments(undefined, DASHBOARD_LIMIT);
     },
     enabled: !!user,
   });
@@ -81,9 +83,9 @@ export default function DashboardPage() {
         return await inventoryService.fetchInventoryDocuments({
           fieldId: "branch",
           value: user?.[0]?.branch?.$id,
-        });
+        }, DASHBOARD_LIMIT);
       }
-      return await inventoryService.fetchInventoryDocuments();
+      return await inventoryService.fetchInventoryDocuments(undefined, DASHBOARD_LIMIT);
     },
     enabled: !!user,
   });
@@ -100,6 +102,31 @@ export default function DashboardPage() {
 
  
   
+
+  const dataReady = !!patients && !!appointments && !!payments && !!inventory;
+  const clinicStats = useMemo(
+    () =>
+      dataReady
+        ? buildClinicStats(patients?.data, appointments?.data, payments?.data, inventory?.data)
+        : null,
+    [dataReady, patients, appointments, payments, inventory]
+  );
+
+  // Hooks must run before any early return (Rules of Hooks).
+  const { data: AiAnalysis, isLoading: isLoadingAiAnalysis, isError: isAiError } = useQuery({
+    queryKey: ["ai-analysis", clinicStats],
+    queryFn: () => analyzeData(clinicStats!),
+    enabled: !!clinicStats && userRole !== "doctor" && userRole !== "staff",
+    staleTime: 30 * 60 * 1000, // don't re-call OpenAI more than every 30 min
+    retry: 1,
+  });
+
+  const mappedData = {
+    patients: patients,
+    appointments: appointments,
+    payments: payments,
+    inventory: inventory,
+  };
 
   if (userRole === "doctor" || userRole === "staff") {
     return <LoadingScreen />;
@@ -118,23 +145,6 @@ export default function DashboardPage() {
       : undefined;
     
  
-
-  const mappedData = {
-    patients: patients,
-    appointments: appointments,
-    payments: payments,
-    inventory: inventory,
-  };
-  const {data:AiAnalysis,isLoading: isLoadingAiAnalysis} = useQuery({
-    queryKey: ['ai-analysis',mappedData],
-    queryFn: () => analyzeData({
-      patients:mappedData.patients?.data || [],
-      appointments:mappedData.appointments?.data || [],
-      payments:mappedData.payments?.data || [],
-      inventory:mappedData.inventory?.data || [],
-    })
-  })
-  
 
   const compareTotalPatientsBetweenMonth = (data: any) => {
     const currentMonth = new Date().getMonth();
@@ -219,26 +229,17 @@ export default function DashboardPage() {
       percentage: Math.round(percentage * 100) / 100,
     };
   };
-  console.log(inventory)
   const findingRunningOutInventory = (data: any) => {
     const now = new Date();
     let lowStock = 0;
     let expired = 0;
 
     data?.data?.forEach((item: any) => {
-      const amount = Number(item?.total || 0);
-      const unit = (item?.unit || "").toLowerCase();
       const expiration = item?.expiration_date
         ? new Date(item?.expiration_date)
         : null;
-
-      const isLowStock =
-        (["chiếc", "ống", "cái"].includes(unit) && amount < 10) ||
-        (unit === "viên" && amount < 100);
-      const isExpired = expiration && expiration < now;
-
-      if (isLowStock) lowStock++;
-      if (isExpired) expired++;
+      if (isLowStock(item)) lowStock++;
+      if (expiration && expiration < now) expired++;
     });
 
     return { lowStock, expired };
@@ -256,13 +257,11 @@ export default function DashboardPage() {
     isLoadingPatients ||
     isLoadingAppointments ||
     isLoadingPayments ||
-    isLoadingInventory ||
-    isLoadingAiAnalysis
+    isLoadingInventory
   ) {
     return <LoadingScreen />;
   }
 
-  console.log(mappedData.payments)
 
   return (
     <ProtectedLayout>
@@ -281,7 +280,7 @@ export default function DashboardPage() {
           <div className="flex flex-col p-6 border-sidebar-border rounded-lg border">
             <h1 className="font-bold mb-2 text-xl">Phân Tích AI</h1>
             <p className="text-sm text-gray-500 mb-4">Phân tích và dự đoán xu hướng dựa trên dữ liệu phòng khám</p>
-            <DashboardAiInsights data= {AiAnalysis} isLoading = {isLoadingAiAnalysis}/>
+            <DashboardAiInsights data={AiAnalysis} isLoading={isLoadingAiAnalysis} isError={isAiError} />
           </div>
         </div>
       </PageContainer>

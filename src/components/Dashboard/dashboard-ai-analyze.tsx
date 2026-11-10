@@ -15,33 +15,36 @@ interface DashboardAiInsightsProps {
     };
   };
   isLoading?: boolean;
+  isError?: boolean;
 }
 
-export function DashboardAiInsights({data,isLoading}:DashboardAiInsightsProps) {
+export function DashboardAiInsights({ data, isLoading, isError }: DashboardAiInsightsProps) {
   const [activeTab, setActiveTab] = useState("predictions")
+  const text = (value?: string) =>
+    isLoading ? "Đang phân tích dữ liệu..." : isError || !value ? "Không thể tải phân tích AI. Vui lòng thử lại sau." : value
 
   const insights = {
     predictions: [
       {
-        title: "",
-        description: `${data?.summary.PatientGrowth}`,
+        title: "Dự Đoán Tăng Trưởng Bệnh Nhân",
+        description: text(data?.summary.PatientGrowth),
         icon: TrendingUp,
       },
       {
         title: "Tối Ưu Hóa Lịch Trình",
-        description: `${data?.summary.OptimiseSchedule}`,
+        description: text(data?.summary.OptimiseSchedule),
         icon: BrainCircuit,
       },
     ],
     alerts: [
       {
         title: "Vật Tư Sắp Hết",
-        description: `${data?.summary.LowStock}`,
+        description: text(data?.summary.LowStock),
         icon: AlertTriangle,
       },
       {
         title: "Lịch Hẹn Xung Đột",
-        description: `${data?.summary.ConflictingSchedule}`,
+        description: text(data?.summary.ConflictingSchedule),
         icon: AlertTriangle,
       },
     ],

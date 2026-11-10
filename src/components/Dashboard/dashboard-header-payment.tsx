@@ -29,3 +29,4 @@ export function DashboardHeaderPayment({ data }: { data: any }) {
         ))}
     </>
   )
+}
